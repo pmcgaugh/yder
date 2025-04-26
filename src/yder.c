@@ -216,7 +216,7 @@ static int y_write_log(const char * app_name,
   static unsigned long cur_mode = Y_LOG_MODE_NONE, cur_level = Y_LOG_LEVEL_NONE;
   FILE * cur_log_file = NULL;
   static char * cur_app_name = NULL;
-  static const char * cur_log_file_path = NULL;
+  static char * cur_log_file_path = NULL;
   static void (* cur_callback_log_message) (void * cls, const char * app_name, const time_t date, const unsigned long level, const char * message) = NULL;
   static void * cur_cls = NULL;
   static char * cur_date_format = NULL;
@@ -234,7 +234,9 @@ static int y_write_log(const char * app_name,
       message == NULL) {
     o_free(cur_app_name);
     o_free(cur_date_format);
+    o_free(cur_log_file_path);
     cur_app_name = NULL;
+    cur_log_file_path = NULL;
     return 1;
   }
   
@@ -269,7 +271,7 @@ static int y_write_log(const char * app_name,
 
   if (init_log_file != NULL) {
     if (cur_log_file_path == NULL) {
-      cur_log_file_path = init_log_file;
+      cur_log_file_path = o_strdup(init_log_file);
     } else {
       // Logs have already been initialized, cancel
       perror("Error - yder logs already initialized");
@@ -287,7 +289,7 @@ static int y_write_log(const char * app_name,
     }
   }
   
-  if (init_mode == Y_LOG_MODE_FILE && o_strnullempty(cur_log_file_path)) {
+    if ((cur_mode & Y_LOG_MODE_FILE) && o_strnullempty(cur_log_file_path)) {
     // Logs have already been initialized, cancel
     perror("Error - log file path missing");
     return 0;
